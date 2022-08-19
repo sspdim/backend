@@ -1,3 +1,13 @@
 username: postgres
 password: postgres
 port: 5432
+
+Database 'sspdim':
+    Table 'userinfo':
+        Column   |          Type          | Collation | Nullable | Default
+        ---------+------------------------+-----------+----------+---------
+        username | character varying      |           | not null |
+        password | character varying(256) |           |          |
+        
+        Indexes:
+            "userinfo_pkey" PRIMARY KEY, btree (username)

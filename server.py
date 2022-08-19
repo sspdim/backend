@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from db import userinfo, connection
 import sqlalchemy as db
+from hashlib import sha256
 
 app = Flask(__name__)
 
@@ -9,7 +10,8 @@ def login():
     query = db.select([userinfo]).where(userinfo.columns.username == request.json['username'])
     res = connection.execute(query)
     result = res.fetchall()
-    if result and result[0][1] == request.json['password']:
+    hashedpwd = sha256(request.json['password'].encode()).hexdigest()
+    if result and result[0][1] == hashedpwd:
         return jsonify({
             'status': 200,
             'message': 'Found user'
@@ -31,7 +33,8 @@ def register():
             'message': 'Username already taken'
         })
     else:
-        query = db.insert(userinfo).values(username = request.json['username'], password = request.json['password'])
+        hashedpwd = sha256(request.json['password'].encode()).hexdigest()
+        query = db.insert(userinfo).values(username = request.json['username'], password = hashedpwd)
         try:
             res = connection.execute(query)
             return jsonify({
@@ -40,7 +43,7 @@ def register():
             })
         except:
             return jsonify({
-                'status': 400,
+                'status': 500,
                 'message': 'Registration unsuccessful'
             })
 

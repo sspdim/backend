@@ -1,17 +1,17 @@
 from flask import Flask, request, jsonify
 from db import userinfo, connection
 import sqlalchemy as db
-from hashlib import sha256
+from flask_bcrypt import Bcrypt
 
 app = Flask(__name__)
+bcrypt = Bcrypt(app)
 
 @app.route('/login', methods=['POST'])
 def login():
     query = db.select([userinfo]).where(userinfo.columns.username == request.json['username'])
     res = connection.execute(query)
     result = res.fetchall()
-    hashedpwd = sha256(request.json['password'].encode()).hexdigest()
-    if result and result[0][1] == hashedpwd:
+    if result and bcrypt.check_password_hash(result[0][1], request.json['password']):
         return jsonify({
             'status': 200,
             'message': 'Found user'
@@ -33,7 +33,7 @@ def register():
             'message': 'Username already taken'
         })
     else:
-        hashedpwd = sha256(request.json['password'].encode()).hexdigest()
+        hashedpwd = bcrypt.generate_password_hash(request.json['password']).decode('utf-8')
         query = db.insert(userinfo).values(username = request.json['username'], password = hashedpwd)
         try:
             res = connection.execute(query)

@@ -14,12 +14,12 @@ def login():
     if result and bcrypt.check_password_hash(result[0][1], request.json['password']):
         return jsonify({
             'status': 200,
-            'message': 'Found user'
+            'message': 'Login Successful!'
         })
     else:
         return jsonify({
             'status': 400,
-            'message': 'Did not find user'
+            'message': 'User not found!'
         })
 
 @app.route('/register', methods=['POST'])
@@ -30,7 +30,7 @@ def register():
     if result:
         return jsonify({
             'status': 400,
-            'message': 'Username already taken'
+            'message': 'Username already taken!'
         })
     else:
         hashedpwd = bcrypt.generate_password_hash(request.json['password']).decode('utf-8')
@@ -39,12 +39,12 @@ def register():
             res = connection.execute(query)
             return jsonify({
                 'status': 200,
-                'message': 'Registration successful'
+                'message': 'Registration successful!'
             })
         except:
             return jsonify({
                 'status': 500,
-                'message': 'Registration unsuccessful'
+                'message': 'Registration unsuccessful!'
             })
 
 @app.route('/', methods=['GET'])

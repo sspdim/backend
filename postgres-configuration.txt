@@ -11,3 +11,11 @@ Database 'sspdim':
         
         Indexes:
             "userinfo_pkey" PRIMARY KEY, btree (username)
+    Table 'servers':
+           Column    |       Type        | Collation | Nullable | Default
+        -------------+-------------------+-----------+----------+---------
+         ip_address  | character varying |           | not null |
+         domain_name | character varying |           |          |
+         status      | character varying |           |          |
+        Indexes:
+            "servers_pkey" PRIMARY KEY, btree (ip_address)

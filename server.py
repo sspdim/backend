@@ -1,5 +1,6 @@
+from http import server
 from flask import Flask, request, jsonify
-from db import userinfo, connection
+from db import userinfo, servers, connection
 import sqlalchemy as db
 from flask_bcrypt import Bcrypt
 
@@ -50,6 +51,14 @@ def register():
 @app.route('/', methods=['GET'])
 def home():
     return "Hello World"
+
+@app.route('/getserverslist', methods=['GET'])
+def get_servers():
+    query = db.select([servers]).where(servers.columns.status == 'active')
+    res = connection.execute(query)
+    result = res.fetchall()
+    json_objects = [{"ip_address": row[0], "domain_name": row[1]} for row in result]
+    return jsonify(json_objects)
 
 if __name__ == '__main__':
     app.run(debug = True)

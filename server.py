@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from db import userinfo, servers, connection
+from db import userinfo, servers, tokens, connection
 import sqlalchemy as db
 from flask_bcrypt import Bcrypt
 
@@ -58,6 +58,21 @@ def get_servers():
     result = res.fetchall()
     json_objects = [{"ip_address": row[0], "domain_name": row[1]} for row in result]
     return jsonify(json_objects)
+
+@app.route('/add-token', methods = ['POST'])
+def add_token():
+    query = db.insert(tokens).values(username = request.json['username'], token = request.json['token'])
+    try:
+        res = connection.execute(query)
+        return jsonify({
+            'status': 200,
+            'message': 'Token added!'
+        })
+    except:
+        return jsonify({
+            'status': 500,
+            'message': 'Token not added!'
+        })
 
 if __name__ == '__main__':
     app.run(debug = True)

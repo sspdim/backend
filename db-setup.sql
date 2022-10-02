@@ -4,5 +4,5 @@ create database sspdim;
 drop table userinfo;
 drop table servers;
 create table userinfo(username varchar primary key, password varchar(256));
-create table servers(ip_address varchar primary key, domain_name varchar, status active);
+create table servers(ip_address varchar primary key, domain_name varchar, status varchar);
 insert into servers values('35.209.49.77', 'none', 'active');

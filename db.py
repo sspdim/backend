@@ -1,4 +1,3 @@
-from turtle import end_fill
 import sqlalchemy
 
 engine = sqlalchemy.create_engine('postgresql://postgres:postgres@localhost:5432/sspdim')

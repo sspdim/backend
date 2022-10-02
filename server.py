@@ -1,4 +1,3 @@
-from http import server
 from flask import Flask, request, jsonify
 from db import userinfo, servers, connection
 import sqlalchemy as db
@@ -52,7 +51,7 @@ def register():
 def home():
     return "Hello World"
 
-@app.route('/getserverslist', methods=['GET'])
+@app.route('/get-servers-list', methods=['GET'])
 def get_servers():
     query = db.select([servers]).where(servers.columns.status == 'active')
     res = connection.execute(query)

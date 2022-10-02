@@ -19,3 +19,10 @@ Database 'sspdim':
          status      | character varying |           |          |
         Indexes:
             "servers_pkey" PRIMARY KEY, btree (ip_address)
+    Table 'tokens':
+          Column  |       Type        | Collation | Nullable | Default
+        ----------+-------------------+-----------+----------+---------
+         token    | character varying |           | not null |
+         username | character varying |           |          |
+        Indexes:
+            "tokens_pkey" PRIMARY KEY, btree (token)

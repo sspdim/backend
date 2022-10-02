@@ -7,3 +7,4 @@ connection = engine.connect()
 
 userinfo = sqlalchemy.Table('userinfo', metadata, autoload_with = engine)
 servers = sqlalchemy.Table('servers', metadata, autoload_with = engine)
+tokens = sqlalchemy.Table('tokens', metadata, autoload_with = engine)

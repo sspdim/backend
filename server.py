@@ -77,7 +77,6 @@ def add_token():
 @app.route('/add-friend', methods = ['POST'])
 def add_friend():
     domain_name = request.json['friend_username'].split('@')[1]
-    print(request.json)
     if domain_name == 'capstone1.devmashru.tech':
         return jsonify({
             'status': 200,
@@ -91,7 +90,6 @@ def add_friend():
 
 @app.route('/message', methods = ['POST'])
 def send_message():
-    print(request.json)
     return jsonify({
         'status': 200,
         'message': f'From: {request.json["f"]}, To: {request.json["to"]}, Messsage: {request.json["message"]}'

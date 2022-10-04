@@ -74,5 +74,28 @@ def add_token():
             'message': 'Token not added!'
         })
 
+@app.route('/add-friend', methods = ['POST'])
+def add_friend():
+    domain_name = request.json['friend_username'].split('@')[1]
+    print(request.json)
+    if domain_name == 'capstone1.devmashru.tech':
+        return jsonify({
+            'status': 200,
+            'message': f'Request sent to {domain_name}'
+        })
+    else:
+        return jsonify({
+            'status': 400,
+            'message': f'Did not find user'
+        })
+
+@app.route('/message', methods = ['POST'])
+def send_message():
+    print(request.json)
+    return jsonify({
+        'status': 200,
+        'message': f'From: {request.json["f"]}, To: {request.json["to"]}, Messsage: {request.json["message"]}'
+    })
+
 if __name__ == '__main__':
     app.run(debug = True)

@@ -100,6 +100,8 @@ def get_servers():
 
 @app.route('/add-token', methods = ['POST'])
 def add_token():
+    query = db.delete(tokens).where(tokens.columns.username == request.json['username'])
+    res = connection.execute(query)
     query = db.insert(tokens).values(username = request.json['username'], token = request.json['token'])
     try:
         res = connection.execute(query)

@@ -142,13 +142,15 @@ def receive_add_friend():
     res = connection.execute(query)
     result = res.fetchall()
     if result:
-        to_token = db.select([tokens]).where(tokens.columns.username == request.json['username'])
+        query = db.select([tokens]).where(tokens.columns.username == request.json['username'])
+        to_token = connection.execute(query).fetchall()
+        print(to_token)
         res = messaging.Message(
             data = {
                     'action': 'add-friend',
                     'username': request.json['username']
                 },
-                token = to_token
+                token = to_token[0][0]
             )
         try:
             resp = messaging.send(res)

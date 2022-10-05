@@ -2,6 +2,9 @@ from flask import Flask, request, jsonify
 from db import userinfo, servers, tokens, connection
 import sqlalchemy as db
 from flask_bcrypt import Bcrypt
+import firebase_admin
+from firebase_admin import messaging
+
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
@@ -46,6 +49,42 @@ def register():
                 'status': 500,
                 'message': 'Registration unsuccessful!'
             })
+
+@app.route('/message', methods=['POST'])
+def send_message():
+    f = request.json['f']
+    to = request.json['to']
+    message = request.json['message']
+    print(' Sending ' + message + ' from ' + f + ' to ' + to)
+    print(request.json)
+
+    # Check if device is online
+
+    # push_message(to, from, message) # GCM? JSON? 
+
+    # from_token = db.select([tokens]).where(tokens.coulmns.username == f)
+    to_token = db.select([tokens]).where(tokens.columns.username == to)
+
+    cred_obj = firebase_admin.credentials.Certificate('path/to/json')
+    default_app = firebase_admin.initialize_app(cred_obj)
+
+    res = messaging.Message(
+            data = {
+                f : f,
+                message : message
+            },
+            token = to_token
+        )
+    try:
+        resp = messaging.send(res)
+        return jsonify({
+            'status': 200
+            })
+    except:
+        return jsonify({
+            'status': 406
+            })
+
 
 @app.route('/', methods=['GET'])
 def home():

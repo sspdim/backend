@@ -1,3 +1,5 @@
+import requests
+import json
 from flask import Flask, request, jsonify
 from db import userinfo, servers, tokens, connection
 import sqlalchemy as db
@@ -5,9 +7,11 @@ from flask_bcrypt import Bcrypt
 import firebase_admin
 from firebase_admin import messaging
 
-
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
+
+cred_obj = firebase_admin.credentials.Certificate('sspdim-firebase-adminsdk-5jn4m-fb95747ef9.json')
+default_app = firebase_admin.initialize_app(cred_obj)
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -65,9 +69,6 @@ def send_message():
     # from_token = db.select([tokens]).where(tokens.coulmns.username == f)
     to_token = db.select([tokens]).where(tokens.columns.username == to)
 
-    cred_obj = firebase_admin.credentials.Certificate('path/to/json')
-    default_app = firebase_admin.initialize_app(cred_obj)
-
     res = messaging.Message(
             data = {
                 f : f,
@@ -84,7 +85,6 @@ def send_message():
         return jsonify({
             'status': 406
             })
-
 
 @app.route('/', methods=['GET'])
 def home():
@@ -115,12 +115,52 @@ def add_token():
 
 @app.route('/add-friend', methods = ['POST'])
 def add_friend():
-    domain_name = request.json['friend_username'].split('@')[1]
-    if domain_name == 'capstone1.devmashru.tech':
+    friend_username, domain_name = request.json['friend_username'].split('@')
+    body = {
+        'username': friend_username
+    }
+    try:
+        r = requests.post('http://' + domain_name + '/receive-add-friend', json = body, headers = {'Content-type': 'application/json'})
+        res = json.loads(r.text)
+        if res['status'] == 200:
+            return jsonify({
+                'status': 200,
+                'message': f'Request sent to {domain_name}'
+            })
+        else:
+            return jsonify(res)
+    except:
         return jsonify({
-            'status': 200,
-            'message': f'Request sent to {domain_name}'
+            'status': 500,
+            'message': 'Error sending request'
         })
+
+@app.route('/receive-add-friend', methods = ['POST'])
+def receive_add_friend():
+    username = request.json['username']
+    query = db.select([userinfo]).where(userinfo.columns.username == username)
+    res = connection.execute(query)
+    result = res.fetchall()
+    if result:
+        to_token = db.select([tokens]).where(tokens.columns.username == request.json['username'])
+        res = messaging.Message(
+            data = {
+                    'action': 'add-friend',
+                    'username': request.json['username']
+                },
+                token = to_token
+            )
+        try:
+            resp = messaging.send(res)
+            return jsonify({
+                'status': 200,
+                'message': 'Request sent'
+            })
+        except:
+            return jsonify({
+                'status': 500,
+                'message': 'Error sending request'
+             })
     else:
         return jsonify({
             'status': 400,

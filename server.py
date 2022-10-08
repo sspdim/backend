@@ -56,38 +56,6 @@ def register():
                 'message': 'Registration unsuccessful!'
             })
 
-@app.route('/message', methods=['POST'])
-def send_message():
-    f = request.json['f']
-    to = request.json['to']
-    message = request.json['message']
-    print(' Sending ' + message + ' from ' + f + ' to ' + to)
-    print(request.json)
-
-    # Check if device is online
-
-    # push_message(to, from, message) # GCM? JSON? 
-
-    # from_token = db.select([tokens]).where(tokens.coulmns.username == f)
-    to_token = db.select([tokens]).where(tokens.columns.username == to)
-
-    res = messaging.Message(
-            data = {
-                f : f,
-                message : message
-            },
-            token = to_token
-        )
-    try:
-        resp = messaging.send(res)
-        return jsonify({
-            'status': 200
-            })
-    except:
-        return jsonify({
-            'status': 406
-            })
-
 @app.route('/', methods=['GET'])
 def home():
     return "Hello World"
@@ -205,6 +173,104 @@ def receive_add_friend():
             return jsonify({
                 'status': 500,
                 'message': 'Error sending request'
+             })
+    else:
+        return jsonify({
+            'status': 400,
+            'message': f'Did not find user'
+        })
+
+@app.route('/send-message', methods = ['POST'])
+def send_message():
+    to, domain_name = request.json['to'].split('@')
+
+    if domain_name == DOMAIN_NAME:
+        query = db.select([userinfo]).where(userinfo.columns.username == to)
+        res = connection.execute(query)
+        result = res.fetchall()
+        if result:
+            query = db.select([tokens]).where(tokens.columns.username == to)
+            to_token = connection.execute(query).fetchall()
+            res = messaging.Message(
+                notification = messaging.Notification(
+                    title = 'Message',
+                    body = 'You have a new message!',
+                ),
+                data = {
+                        'action': 'message',
+                        'data': request.json['from'],
+                        'message': request.json['message']
+                    },
+                    token = to_token[0][0]
+                )
+            try:
+                resp = messaging.send(res)
+                print(resp)
+                return jsonify({
+                    'status': 200,
+                    'message': 'Message sent'
+                })
+            except:
+                return jsonify({
+                    'status': 500,
+                    'message': 'Error sending message'
+                })
+        else:
+            return jsonify({
+                'status': 400,
+                'message': f'Did not find user'
+            })
+    else:
+        body = {
+            'from': request.json['from'],
+            'to': to,
+            'message': request.json['message']
+        }
+        try:
+            r = requests.post('http://' + domain_name + '/receive-add-friend', json = body, headers = {'Content-type': 'application/json'})
+            res = json.loads(r.text)
+            if res['status'] == 200:
+                return jsonify({
+                    'status': 200,
+                    'message': f'Message sent to {domain_name}'
+                })
+            else:
+                return jsonify(res)
+        except:
+            return jsonify({
+                'status': 500,
+                'message': 'Error sending message'
+            })
+
+@app.route('/receive-message', methods = ['POST'])
+def receive_message():
+    to = request.json['to']
+    query = db.select([userinfo]).where(userinfo.columns.username == to)
+    res = connection.execute(query)
+    result = res.fetchall()
+    if result:
+        query = db.select([tokens]).where(tokens.columns.username == request.json['to'])
+        to_token = connection.execute(query).fetchall()
+        print(to_token)
+        res = messaging.Message(
+            data = {
+                    'action': 'message',
+                    'data': request.json['from'],
+                    'message': request.json['message']
+                },
+                token = to_token[0][0]
+            )
+        try:
+            resp = messaging.send(res)
+            print(resp)
+            return jsonify({
+                'status': 200,
+                'message': 'Message sent'
+            })
+        except:
+            return jsonify({
+                'status': 500,
+                'message': 'Error sending message'
              })
     else:
         return jsonify({

@@ -229,7 +229,7 @@ def send_message():
             'message_id': request.json['message_id']
         }
         try:
-            r = requests.post('http://' + domain_name + '/receive-add-friend', json = body, headers = {'Content-type': 'application/json'})
+            r = requests.post('http://' + domain_name + '/receive-message', json = body, headers = {'Content-type': 'application/json'})
             res = json.loads(r.text)
             if res['status'] == 200:
                 return jsonify({

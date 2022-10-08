@@ -286,7 +286,7 @@ def receive_message():
         })
 
 @app.route('/accept-friend', methods = ['POST'])
-def add_friend():
+def accept_friend():
     friend_username, domain_name = request.json['friend_username'].split('@')
 
     if domain_name == DOMAIN_NAME:
@@ -347,7 +347,7 @@ def add_friend():
             })
 
 @app.route('/receive-accept-friend', methods = ['POST'])
-def receive_add_friend():
+def receive_accept_friend():
     username = request.json['username']
     query = db.select([userinfo]).where(userinfo.columns.username == username)
     res = connection.execute(query)

@@ -199,7 +199,8 @@ def send_message():
                 data = {
                         'action': 'message',
                         'data': request.json['from'],
-                        'message': request.json['message']
+                        'message': request.json['message'],
+                        'message_id': request.json['message_id']
                     },
                     token = to_token[0][0]
                 )
@@ -256,7 +257,8 @@ def receive_message():
             data = {
                     'action': 'message',
                     'data': request.json['from'],
-                    'message': request.json['message']
+                    'message': request.json['message'],
+                    'message_id': request.json['message_id']
                 },
                 token = to_token[0][0]
             )

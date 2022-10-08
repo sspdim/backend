@@ -225,7 +225,8 @@ def send_message():
         body = {
             'from': request.json['from'],
             'to': to,
-            'message': request.json['message']
+            'message': request.json['message'],
+            'message_id': request.json['message_id']
         }
         try:
             r = requests.post('http://' + domain_name + '/receive-add-friend', json = body, headers = {'Content-type': 'application/json'})

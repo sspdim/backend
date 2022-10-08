@@ -157,6 +157,10 @@ def receive_add_friend():
         to_token = connection.execute(query).fetchall()
         print(to_token)
         res = messaging.Message(
+            notification = messaging.Notification(
+                title = 'Friend Request',
+                body = 'You have a new friend request!',
+            ),
             data = {
                     'action': 'add-friend',
                     'data': request.json['username']
@@ -274,6 +278,105 @@ def receive_message():
             return jsonify({
                 'status': 500,
                 'message': 'Error sending message'
+             })
+    else:
+        return jsonify({
+            'status': 400,
+            'message': f'Did not find user'
+        })
+
+@app.route('/accept-friend', methods = ['POST'])
+def add_friend():
+    friend_username, domain_name = request.json['friend_username'].split('@')
+
+    if domain_name == DOMAIN_NAME:
+        query = db.select([userinfo]).where(userinfo.columns.username == friend_username)
+        res = connection.execute(query)
+        result = res.fetchall()
+        if result:
+            query = db.select([tokens]).where(tokens.columns.username == friend_username)
+            to_token = connection.execute(query).fetchall()
+            print(to_token)
+            res = messaging.Message(
+                notification = messaging.Notification(
+                    title = 'Friend Request Accepted',
+                    body = 'Your friend request was accepted!',
+                ),
+                data = {
+                        'action': 'accept-friend',
+                        'data': request.json['username']
+                    },
+                    token = to_token[0][0]
+                )
+            try:
+                resp = messaging.send(res)
+                print(resp)
+                return jsonify({
+                    'status': 200,
+                    'message': 'Request sent'
+                })
+            except:
+                return jsonify({
+                    'status': 500,
+                    'message': 'Error sending request'
+                })
+        else:
+            return jsonify({
+                'status': 400,
+                'message': f'Did not find user'
+            })
+    else:
+        body = {
+            'username': request.json['username'],
+            'friend_username': friend_username
+        }
+        try:
+            r = requests.post('http://' + domain_name + '/receive-accept-friend', json = body, headers = {'Content-type': 'application/json'})
+            res = json.loads(r.text)
+            if res['status'] == 200:
+                return jsonify({
+                    'status': 200,
+                    'message': f'Request sent to {domain_name}'
+                })
+            else:
+                return jsonify(res)
+        except:
+            return jsonify({
+                'status': 500,
+                'message': 'Error sending request'
+            })
+
+@app.route('/receive-accept-friend', methods = ['POST'])
+def receive_add_friend():
+    username = request.json['username']
+    query = db.select([userinfo]).where(userinfo.columns.username == username)
+    res = connection.execute(query)
+    result = res.fetchall()
+    if result:
+        query = db.select([tokens]).where(tokens.columns.username == request.json['username'])
+        to_token = connection.execute(query).fetchall()
+        print(to_token)
+        res = messaging.Message(
+            notification = messaging.Notification(
+                title = 'Friend Request Accepted',
+                body = 'Your friend request was accepted!',
+            ),
+            data = {
+                    'action': 'accept-friend',
+                    'data': request.json['username']
+                },
+                token = to_token[0][0]
+            )
+        try:
+            resp = messaging.send(res)
+            return jsonify({
+                'status': 200,
+                'message': 'Request sent'
+            })
+        except:
+            return jsonify({
+                'status': 500,
+                'message': 'Error sending request'
              })
     else:
         return jsonify({

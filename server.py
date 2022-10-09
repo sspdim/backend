@@ -126,7 +126,7 @@ def add_friend():
                 })
             try:
                 query = db.insert(pending_friend_requests).values(
-                    from_username = request.json['username'] + '@' + DOMAIN_NAME,
+                    from_username = request.json['username'],
                     to_username = request.json['friend_username'],
                     request_status = FRIEND_REQUEST_PENDING)
                 connection.execute(query)
@@ -194,7 +194,7 @@ def receive_add_friend():
              })
         try:
             query = db.insert(pending_friend_requests).values(
-                from_username = request.json['username'] + '@' + DOMAIN_NAME,
+                from_username = request.json['username'],
                 to_username = request.json['friend_username'],
                 request_status = FRIEND_REQUEST_PENDING)
             connection.execute(query)
@@ -246,7 +246,7 @@ def send_message():
                 })
             try:
                 query = db.insert(pending_messages).values(
-                    from_username = request.json['username'] + '@' + DOMAIN_NAME,
+                    from_username = request.json['username'],
                     to_username = request.json['friend_username'],
                     message_content = request.json['message'],
                     message_id = request.json['message_id'])
@@ -316,7 +316,7 @@ def receive_message():
              })
         try:
             query = db.insert(pending_messages).values(
-                from_username = request.json['username'] + '@' + DOMAIN_NAME,
+                from_username = request.json['username'],
                 to_username = request.json['friend_username'],
                 message_content = request.json['message'],
                 message_id = request.json['message_id'])
@@ -368,7 +368,7 @@ def accept_friend():
                 })
             try:
                 query = db.insert(pending_friend_requests).values(
-                    from_username = request.json['username'] + '@' + DOMAIN_NAME,
+                    from_username = request.json['username'],
                     to_username = request.json['friend_username'],
                     request_status = FRIEND_REQUEST_ACCEPTED)
                 connection.execute(query)
@@ -436,7 +436,7 @@ def receive_accept_friend():
              })
         try:
             query = db.insert(pending_friend_requests).values(
-                from_username = request.json['username'] + '@' + DOMAIN_NAME,
+                from_username = request.json['username'],
                 to_username = request.json['friend_username'],
                 request_status = FRIEND_REQUEST_ACCEPTED)
             connection.execute(query)

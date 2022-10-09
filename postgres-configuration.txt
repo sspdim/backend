@@ -26,3 +26,21 @@ Database 'sspdim':
          username | character varying |           |          |
         Indexes:
             "tokens_pkey" PRIMARY KEY, btree (token)
+    Table 'pending_friend_requests':
+                   Table "public.pending_friend_requests"
+            Column     |       Type        | Collation | Nullable | Default
+        ---------------+-------------------+-----------+----------+---------
+         from_username | character varying |           | not null |
+         to_username   | character varying |           | not null |
+        Indexes:
+            "pending_friend_requests_pkey" PRIMARY KEY, btree (from_username, to_username)
+    Table 'pending_messages':
+                       Table "public.pending_messages"
+             Column      |       Type        | Collation | Nullable | Default
+        -----------------+-------------------+-----------+----------+---------
+         from_username   | character varying |           | not null |
+         to_username     | character varying |           | not null |
+         message_content | character varying |           |          |
+         message_id      | character varying |           | not null |
+        Indexes:
+            "pending_messages_pkey" PRIMARY KEY, btree (from_username, to_username, message_id)

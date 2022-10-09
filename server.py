@@ -456,6 +456,9 @@ def get_pending_friend_requests():
         pending_friend_requests.columns.to_username == to_username)
     result = connection.execute(query).fetchall()
     response = [{'from_username': row[0], 'status': row[2]} for row in result]
+    query = db.delete([pending_friend_requests]).where(
+        pending_friend_requests.columns.to_username == to_username)
+    result = connection.execute(query)
     return response
 
 @app.route('/pending-messages', methods = ['POST'])
@@ -465,6 +468,9 @@ def get_pending_messages():
         pending_messages.columns.to_username == to_username)
     result = connection.execute(query).fetchall()
     response = [{'from_username': row[0], 'message_content': row[2], 'message_id': row[3]} for row in result]
+    query = db.delete([pending_friend_requests]).where(
+        pending_messages.columns.to_username == to_username)
+    result = connection.execute(query)
     return response
 
 if __name__ == '__main__':

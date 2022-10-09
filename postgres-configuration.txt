@@ -32,6 +32,7 @@ Database 'sspdim':
         ---------------+-------------------+-----------+----------+---------
          from_username | character varying |           | not null |
          to_username   | character varying |           | not null |
+        request_status | integer           |           |          |
         Indexes:
             "pending_friend_requests_pkey" PRIMARY KEY, btree (from_username, to_username)
     Table 'pending_messages':

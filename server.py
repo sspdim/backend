@@ -1,7 +1,8 @@
+from urllib import response
 import requests
 import json
 from flask import Flask, request, jsonify
-from db import userinfo, servers, tokens, connection
+from db import userinfo, servers, tokens, pending_friend_requests, pending_messages, connection
 import sqlalchemy as db
 from flask_bcrypt import Bcrypt
 import firebase_admin
@@ -11,6 +12,8 @@ app = Flask(__name__)
 bcrypt = Bcrypt(app)
 
 DOMAIN_NAME = 'capstone1.devmashru.tech'
+FRIEND_REQUEST_PENDING = 3
+FRIEND_REQUEST_ACCEPTED = 2
 
 cred_obj = firebase_admin.credentials.Certificate('sspdim-firebase-adminsdk-5jn4m-fb95747ef9.json')
 default_app = firebase_admin.initialize_app(cred_obj)
@@ -88,6 +91,7 @@ def add_token():
 @app.route('/add-friend', methods = ['POST'])
 def add_friend():
     friend_username, domain_name = request.json['friend_username'].split('@')
+    response = {}
 
     if domain_name == DOMAIN_NAME:
         query = db.select([userinfo]).where(userinfo.columns.username == friend_username)
@@ -111,17 +115,25 @@ def add_friend():
             try:
                 resp = messaging.send(res)
                 print(resp)
-                return jsonify({
+                response = jsonify({
                     'status': 200,
                     'message': 'Request sent'
                 })
             except:
-                return jsonify({
+                response = jsonify({
                     'status': 500,
                     'message': 'Error sending request'
                 })
+            try:
+                query = db.insert(pending_friend_requests).values(
+                    from_username = request.json['username'] + '@' + DOMAIN_NAME,
+                    to_username = request.json['friend_username'],
+                    request_status = FRIEND_REQUEST_PENDING)
+                connection.execute(query)
+            except:
+                pass
         else:
-            return jsonify({
+            response = jsonify({
                 'status': 400,
                 'message': f'Did not find user'
             })
@@ -134,17 +146,18 @@ def add_friend():
             r = requests.post('http://' + domain_name + '/receive-add-friend', json = body, headers = {'Content-type': 'application/json'})
             res = json.loads(r.text)
             if res['status'] == 200:
-                return jsonify({
+                response = jsonify({
                     'status': 200,
                     'message': f'Request sent to {domain_name}'
                 })
             else:
                 return jsonify(res)
         except:
-            return jsonify({
+            response = jsonify({
                 'status': 500,
                 'message': 'Error sending request'
             })
+    return response
 
 @app.route('/receive-add-friend', methods = ['POST'])
 def receive_add_friend():
@@ -152,6 +165,7 @@ def receive_add_friend():
     query = db.select([userinfo]).where(userinfo.columns.username == username)
     res = connection.execute(query)
     result = res.fetchall()
+    response = {}
     if result:
         query = db.select([tokens]).where(tokens.columns.username == request.json['username'])
         to_token = connection.execute(query).fetchall()
@@ -169,24 +183,34 @@ def receive_add_friend():
             )
         try:
             resp = messaging.send(res)
-            return jsonify({
+            response = jsonify({
                 'status': 200,
                 'message': 'Request sent'
             })
         except:
-            return jsonify({
+            response = jsonify({
                 'status': 500,
                 'message': 'Error sending request'
              })
+        try:
+            query = db.insert(pending_friend_requests).values(
+                from_username = request.json['username'] + '@' + DOMAIN_NAME,
+                to_username = request.json['friend_username'],
+                request_status = FRIEND_REQUEST_PENDING)
+            connection.execute(query)
+        except:
+            pass
     else:
-        return jsonify({
+        response = jsonify({
             'status': 400,
             'message': f'Did not find user'
         })
+    return response
 
 @app.route('/send-message', methods = ['POST'])
 def send_message():
     to, domain_name = request.json['to'].split('@')
+    response = {}
 
     if domain_name == DOMAIN_NAME:
         query = db.select([userinfo]).where(userinfo.columns.username == to)
@@ -211,17 +235,26 @@ def send_message():
             try:
                 resp = messaging.send(res)
                 print(resp)
-                return jsonify({
+                response = jsonify({
                     'status': 200,
                     'message': 'Message sent'
                 })
             except:
-                return jsonify({
+                response = jsonify({
                     'status': 500,
                     'message': 'Error sending message'
                 })
+            try:
+                query = db.insert(pending_messages).values(
+                    from_username = request.json['username'] + '@' + DOMAIN_NAME,
+                    to_username = request.json['friend_username'],
+                    message_content = request.json['message'],
+                    message_id = request.json['message_id'])
+                connection.execute(query)
+            except:
+                pass
         else:
-            return jsonify({
+            response = jsonify({
                 'status': 400,
                 'message': f'Did not find user'
             })
@@ -236,17 +269,18 @@ def send_message():
             r = requests.post('http://' + domain_name + '/receive-message', json = body, headers = {'Content-type': 'application/json'})
             res = json.loads(r.text)
             if res['status'] == 200:
-                return jsonify({
+                response = jsonify({
                     'status': 200,
                     'message': f'Message sent to {domain_name}'
                 })
             else:
-                return jsonify(res)
+                response = jsonify(res)
         except:
-            return jsonify({
+            response = jsonify({
                 'status': 500,
                 'message': 'Error sending message'
             })
+    return response
 
 @app.route('/receive-message', methods = ['POST'])
 def receive_message():
@@ -254,6 +288,7 @@ def receive_message():
     query = db.select([userinfo]).where(userinfo.columns.username == to)
     res = connection.execute(query)
     result = res.fetchall()
+    response = {}
     if result:
         query = db.select([tokens]).where(tokens.columns.username == request.json['to'])
         to_token = connection.execute(query).fetchall()
@@ -270,20 +305,30 @@ def receive_message():
         try:
             resp = messaging.send(res)
             print(resp)
-            return jsonify({
+            response = jsonify({
                 'status': 200,
                 'message': 'Message sent'
             })
         except:
-            return jsonify({
+            response = jsonify({
                 'status': 500,
                 'message': 'Error sending message'
              })
+        try:
+            query = db.insert(pending_messages).values(
+                from_username = request.json['username'] + '@' + DOMAIN_NAME,
+                to_username = request.json['friend_username'],
+                message_content = request.json['message'],
+                message_id = request.json['message_id'])
+            connection.execute(query)
+        except:
+            pass
     else:
-        return jsonify({
+        response = jsonify({
             'status': 400,
             'message': f'Did not find user'
         })
+    return response
 
 @app.route('/accept-friend', methods = ['POST'])
 def accept_friend():
@@ -293,6 +338,7 @@ def accept_friend():
         query = db.select([userinfo]).where(userinfo.columns.username == friend_username)
         res = connection.execute(query)
         result = res.fetchall()
+        response = {}
         if result:
             query = db.select([tokens]).where(tokens.columns.username == friend_username)
             to_token = connection.execute(query).fetchall()
@@ -311,17 +357,25 @@ def accept_friend():
             try:
                 resp = messaging.send(res)
                 print(resp)
-                return jsonify({
+                response = jsonify({
                     'status': 200,
                     'message': 'Request sent'
                 })
             except:
-                return jsonify({
+                response = jsonify({
                     'status': 500,
                     'message': 'Error sending request'
                 })
+            try:
+                query = db.insert(pending_friend_requests).values(
+                    from_username = request.json['username'] + '@' + DOMAIN_NAME,
+                    to_username = request.json['friend_username'],
+                    request_status = FRIEND_REQUEST_ACCEPTED)
+                connection.execute(query)
+            except:
+                pass
         else:
-            return jsonify({
+            response = jsonify({
                 'status': 400,
                 'message': f'Did not find user'
             })
@@ -334,17 +388,18 @@ def accept_friend():
             r = requests.post('http://' + domain_name + '/receive-accept-friend', json = body, headers = {'Content-type': 'application/json'})
             res = json.loads(r.text)
             if res['status'] == 200:
-                return jsonify({
+                response = jsonify({
                     'status': 200,
                     'message': f'Request sent to {domain_name}'
                 })
             else:
-                return jsonify(res)
+                response = jsonify(res)
         except:
-            return jsonify({
+            response = jsonify({
                 'status': 500,
                 'message': 'Error sending request'
             })
+    return response
 
 @app.route('/receive-accept-friend', methods = ['POST'])
 def receive_accept_friend():
@@ -352,6 +407,7 @@ def receive_accept_friend():
     query = db.select([userinfo]).where(userinfo.columns.username == username)
     res = connection.execute(query)
     result = res.fetchall()
+    response = {}
     if result:
         query = db.select([tokens]).where(tokens.columns.username == request.json['username'])
         to_token = connection.execute(query).fetchall()
@@ -369,20 +425,38 @@ def receive_accept_friend():
             )
         try:
             resp = messaging.send(res)
-            return jsonify({
+            response =  jsonify({
                 'status': 200,
                 'message': 'Request sent'
             })
         except:
-            return jsonify({
+            response =  jsonify({
                 'status': 500,
                 'message': 'Error sending request'
              })
+        try:
+            query = db.insert(pending_friend_requests).values(
+                from_username = request.json['username'] + '@' + DOMAIN_NAME,
+                to_username = request.json['friend_username'],
+                request_status = FRIEND_REQUEST_ACCEPTED)
+            connection.execute(query)
+        except:
+            pass
     else:
-        return jsonify({
+        response =  jsonify({
             'status': 400,
             'message': f'Did not find user'
         })
+    return response
+
+@app.route('/pending-friend-requests', methods = ['POST'])
+def get_pending_friend_requests():
+    to_username = request.json['username']
+    query = db.select([pending_friend_requests]).where(
+        pending_friend_requests.columns.to_username == to_username)
+    result = connection.execute(query).fetchall()
+    response = [{'from_username': row[0], 'status': row[2]} for row in result]
+    return response
 
 if __name__ == '__main__':
     app.run(debug = True)

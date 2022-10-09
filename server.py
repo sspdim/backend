@@ -455,7 +455,7 @@ def get_pending_friend_requests():
 @app.route('/pending-messages', methods = ['POST'])
 def get_pending_messages():
     to_username = request.json['username']
-    query = db.select(pending_messages).where(
+    query = db.select([pending_messages]).where(
         pending_messages.columns.to_username == to_username)
     result = connection.execute(query).fetchall()
     response = [{'from_username': row[0], 'message_content': row[2], 'message_id': row[3]} for row in result]

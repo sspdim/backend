@@ -1,4 +1,3 @@
-from urllib import response
 import requests
 import json
 from flask import Flask, request, jsonify
@@ -138,7 +137,7 @@ def add_friend():
     else:
         body = {
             'username': request.json['username'],
-            'friend_username': friend_username
+            'friend_username': request.json['friend_username']
         }
         try:
             r = requests.post('http://' + domain_name + '/receive-add-friend', json = body, headers = {'Content-type': 'application/json'})
@@ -159,13 +158,13 @@ def add_friend():
 
 @app.route('/receive-add-friend', methods = ['POST'])
 def receive_add_friend():
-    username = request.json['username']
-    query = db.select([userinfo]).where(userinfo.columns.username == username)
+    friend_username = request.json['friend_username'].split('@')[0]
+    query = db.select([userinfo]).where(userinfo.columns.username == friend_username)
     res = connection.execute(query)
     result = res.fetchall()
     response = {}
     if result:
-        query = db.select([tokens]).where(tokens.columns.username == request.json['username'])
+        query = db.select([tokens]).where(tokens.columns.username == friend_username)
         to_token = connection.execute(query).fetchall()
         res = messaging.Message(
             notification = messaging.Notification(
@@ -286,7 +285,7 @@ def receive_message():
     result = res.fetchall()
     response = {}
     if result:
-        query = db.select([tokens]).where(tokens.columns.username == request.json['to'])
+        query = db.select([tokens]).where(tokens.columns.username == to)
         to_token = connection.execute(query).fetchall()
         res = messaging.Message(
             data = {
@@ -374,7 +373,7 @@ def accept_friend():
     else:
         body = {
             'username': request.json['username'],
-            'friend_username': friend_username
+            'friend_username': request.json['friend_username']
         }
         try:
             r = requests.post('http://' + domain_name + '/receive-accept-friend', json = body, headers = {'Content-type': 'application/json'})
@@ -395,13 +394,13 @@ def accept_friend():
 
 @app.route('/receive-accept-friend', methods = ['POST'])
 def receive_accept_friend():
-    username = request.json['username']
+    username = request.json['username'].split('@')[0]
     query = db.select([userinfo]).where(userinfo.columns.username == username)
     res = connection.execute(query)
     result = res.fetchall()
     response = {}
     if result:
-        query = db.select([tokens]).where(tokens.columns.username == request.json['username'])
+        query = db.select([tokens]).where(tokens.columns.username == username)
         to_token = connection.execute(query).fetchall()
         res = messaging.Message(
             notification = messaging.Notification(

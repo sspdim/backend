@@ -100,7 +100,6 @@ def add_friend():
         if result:
             query = db.select([tokens]).where(tokens.columns.username == friend_username)
             to_token = connection.execute(query).fetchall()
-            print(to_token)
             res = messaging.Message(
                 notification = messaging.Notification(
                     title = 'Friend Request',
@@ -114,7 +113,6 @@ def add_friend():
                 )
             try:
                 resp = messaging.send(res)
-                print(resp)
                 response = jsonify({
                     'status': 200,
                     'message': 'Request sent'
@@ -169,7 +167,6 @@ def receive_add_friend():
     if result:
         query = db.select([tokens]).where(tokens.columns.username == request.json['username'])
         to_token = connection.execute(query).fetchall()
-        print(to_token)
         res = messaging.Message(
             notification = messaging.Notification(
                 title = 'Friend Request',
@@ -234,7 +231,6 @@ def send_message():
                 )
             try:
                 resp = messaging.send(res)
-                print(resp)
                 response = jsonify({
                     'status': 200,
                     'message': 'Message sent'
@@ -292,7 +288,6 @@ def receive_message():
     if result:
         query = db.select([tokens]).where(tokens.columns.username == request.json['to'])
         to_token = connection.execute(query).fetchall()
-        print(to_token)
         res = messaging.Message(
             data = {
                     'action': 'message',
@@ -304,7 +299,6 @@ def receive_message():
             )
         try:
             resp = messaging.send(res)
-            print(resp)
             response = jsonify({
                 'status': 200,
                 'message': 'Message sent'
@@ -342,7 +336,6 @@ def accept_friend():
         if result:
             query = db.select([tokens]).where(tokens.columns.username == friend_username)
             to_token = connection.execute(query).fetchall()
-            print(to_token)
             res = messaging.Message(
                 notification = messaging.Notification(
                     title = 'Friend Request Accepted',
@@ -356,7 +349,6 @@ def accept_friend():
                 )
             try:
                 resp = messaging.send(res)
-                print(resp)
                 response = jsonify({
                     'status': 200,
                     'message': 'Request sent'
@@ -411,7 +403,6 @@ def receive_accept_friend():
     if result:
         query = db.select([tokens]).where(tokens.columns.username == request.json['username'])
         to_token = connection.execute(query).fetchall()
-        print(to_token)
         res = messaging.Message(
             notification = messaging.Notification(
                 title = 'Friend Request Accepted',

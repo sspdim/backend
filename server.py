@@ -91,6 +91,7 @@ def add_token():
 def add_friend():
     friend_username, domain_name = request.json['friend_username'].split('@')
     response = {}
+    domain_name.strip()
 
     if domain_name == DOMAIN_NAME:
         query = db.select([userinfo]).where(userinfo.columns.username == friend_username)
@@ -132,7 +133,7 @@ def add_friend():
         else:
             response = jsonify({
                 'status': 400,
-                'message': f'Did not find user'
+                'message': 'Did not find user'
             })
     else:
         body = {
@@ -199,7 +200,7 @@ def receive_add_friend():
     else:
         response = jsonify({
             'status': 400,
-            'message': f'Did not find user'
+            'message': 'Did not find user'
         })
     return response
 
@@ -207,6 +208,7 @@ def receive_add_friend():
 def send_message():
     to, domain_name = request.json['to'].split('@')
     response = {}
+    domain_name.strip()
 
     if domain_name == DOMAIN_NAME:
         query = db.select([userinfo]).where(userinfo.columns.username == to)
@@ -251,12 +253,12 @@ def send_message():
         else:
             response = jsonify({
                 'status': 400,
-                'message': f'Did not find user'
+                'message': 'Did not find user'
             })
     else:
         body = {
             'from': request.json['from'],
-            'to': to,
+            'to': request.json['to'],
             'message': request.json['message'],
             'message_id': request.json['message_id']
         }
@@ -279,7 +281,7 @@ def send_message():
 
 @app.route('/receive-message', methods = ['POST'])
 def receive_message():
-    to = request.json['to']
+    to = request.json['to'].split('@')[0]
     query = db.select([userinfo]).where(userinfo.columns.username == to)
     res = connection.execute(query)
     result = res.fetchall()
@@ -288,6 +290,10 @@ def receive_message():
         query = db.select([tokens]).where(tokens.columns.username == to)
         to_token = connection.execute(query).fetchall()
         res = messaging.Message(
+            notification = messaging.Notification(
+                title = 'New message',
+                body = 'You have a new message!',
+            ),
             data = {
                     'action': 'message',
                     'data': request.json['from'],
@@ -319,13 +325,14 @@ def receive_message():
     else:
         response = jsonify({
             'status': 400,
-            'message': f'Did not find user'
+            'message': 'Did not find user'
         })
     return response
 
 @app.route('/accept-friend', methods = ['POST'])
 def accept_friend():
     friend_username, domain_name = request.json['friend_username'].split('@')
+    domain_name.strip()
 
     if domain_name == DOMAIN_NAME:
         query = db.select([userinfo]).where(userinfo.columns.username == friend_username)
@@ -368,7 +375,7 @@ def accept_friend():
         else:
             response = jsonify({
                 'status': 400,
-                'message': f'Did not find user'
+                'message': 'Did not find user'
             })
     else:
         body = {
@@ -435,7 +442,7 @@ def receive_accept_friend():
     else:
         response =  jsonify({
             'status': 400,
-            'message': f'Did not find user'
+            'message': 'Did not find user'
         })
     return response
 

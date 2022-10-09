@@ -246,8 +246,8 @@ def send_message():
                 })
             try:
                 query = db.insert(pending_messages).values(
-                    from_username = request.json['username'],
-                    to_username = request.json['friend_username'],
+                    from_username = request.json['from'],
+                    to_username = request.json['to'],
                     message_content = request.json['message'],
                     message_id = request.json['message_id'])
                 connection.execute(query)
@@ -316,8 +316,8 @@ def receive_message():
              })
         try:
             query = db.insert(pending_messages).values(
-                from_username = request.json['username'],
-                to_username = request.json['friend_username'],
+                from_username = request.json['from'],
+                to_username = request.json['to'],
                 message_content = request.json['message'],
                 message_id = request.json['message_id'])
             connection.execute(query)
@@ -456,7 +456,7 @@ def get_pending_friend_requests():
         pending_friend_requests.columns.to_username == to_username)
     result = connection.execute(query).fetchall()
     response = [{'from_username': row[0], 'status': row[2]} for row in result]
-    query = db.delete([pending_friend_requests]).where(
+    query = db.delete(pending_friend_requests).where(
         pending_friend_requests.columns.to_username == to_username)
     result = connection.execute(query)
     return response
@@ -464,11 +464,11 @@ def get_pending_friend_requests():
 @app.route('/pending-messages', methods = ['POST'])
 def get_pending_messages():
     to_username = request.json['username']
-    query = db.select([pending_friend_requests]).where(
+    query = db.select(pending_messages).where(
         pending_messages.columns.to_username == to_username)
     result = connection.execute(query).fetchall()
     response = [{'from_username': row[0], 'message_content': row[2], 'message_id': row[3]} for row in result]
-    query = db.delete([pending_friend_requests]).where(
+    query = db.delete(pending_messages).where(
         pending_messages.columns.to_username == to_username)
     result = connection.execute(query)
     return response

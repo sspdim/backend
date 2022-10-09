@@ -290,6 +290,10 @@ def receive_message():
         query = db.select([tokens]).where(tokens.columns.username == to)
         to_token = connection.execute(query).fetchall()
         res = messaging.Message(
+            notification = messaging.Notification(
+                title = 'New message',
+                body = 'You have a new message!',
+            ),
             data = {
                     'action': 'message',
                     'data': request.json['from'],

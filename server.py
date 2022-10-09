@@ -10,7 +10,7 @@ from firebase_admin import messaging
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
 
-DOMAIN_NAME = 'capstone1.devmashru.tech'
+DOMAIN_NAME = 'capstone.devmashru.tech'
 FRIEND_REQUEST_PENDING = 3
 FRIEND_REQUEST_ACCEPTED = 2
 

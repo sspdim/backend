@@ -402,13 +402,13 @@ def accept_friend():
 
 @app.route('/receive-accept-friend', methods = ['POST'])
 def receive_accept_friend():
-    username = request.json['username'].split('@')[0]
-    query = db.select([userinfo]).where(userinfo.columns.username == username)
+    friend_username = request.json['friend_username'].split('@')[0]
+    query = db.select([userinfo]).where(userinfo.columns.username == friend_username)
     res = connection.execute(query)
     result = res.fetchall()
     response = {}
     if result:
-        query = db.select([tokens]).where(tokens.columns.username == username)
+        query = db.select([tokens]).where(tokens.columns.username == friend_username)
         to_token = connection.execute(query).fetchall()
         res = messaging.Message(
             notification = messaging.Notification(

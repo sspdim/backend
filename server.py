@@ -1,3 +1,4 @@
+from operator import and_
 import requests
 import json
 from flask import Flask, request, jsonify
@@ -72,7 +73,7 @@ def get_servers():
 
 @app.route('/add-token', methods = ['POST'])
 def add_token():
-    query = db.delete(tokens).where(tokens.columns.username == request.json['username'])
+    query = db.delete(tokens).where(and_(tokens.columns.username == request.json['username'], tokens.columns.token == request.json['token']))
     res = connection.execute(query)
     query = db.insert(tokens).values(username = request.json['username'], token = request.json['token'])
     try:

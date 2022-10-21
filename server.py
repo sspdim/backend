@@ -8,6 +8,8 @@ from flask_bcrypt import Bcrypt
 import firebase_admin
 from firebase_admin import messaging
 
+import subprocess, os
+
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
 
@@ -470,6 +472,12 @@ def get_pending_messages():
         pending_messages.columns.to_username == to_username)
     result = connection.execute(query)
     return response
+
+@app.route('/webhook', methods = ['POST'])
+def webhook():
+    home = os.environ["HOME"]
+    subprocess.call(['bash', home + '/backend/scripts/pull.sh'])
+    return jsonify({ 'status': 200 })
 
 if __name__ == '__main__':
     app.run(debug = True)

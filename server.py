@@ -61,10 +61,6 @@ def register():
                 'message': 'Registration unsuccessful!'
             })
 
-@app.route('/', methods=['GET'])
-def home():
-    return "Hello World"
-
 @app.route('/get-servers-list', methods=['GET'])
 def get_servers():
     query = db.select([servers]).where(servers.columns.status == 'active')
@@ -478,6 +474,10 @@ def webhook():
     home = os.environ["HOME"]
     subprocess.call(['bash', home + '/backend/scripts/pull.sh'])
     return jsonify({ 'status': 200 })
+
+@app.route('/', methods=['GET'])
+def home():
+    return "Hello World"
 
 if __name__ == '__main__':
     app.run(debug = True)

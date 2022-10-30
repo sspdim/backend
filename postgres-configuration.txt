@@ -45,3 +45,15 @@ Database 'sspdim':
          message_id      | character varying |           | not null |
         Indexes:
             "pending_messages_pkey" PRIMARY KEY, btree (from_username, to_username, message_id)
+    Table 'keys':
+            Column      |       Type        | Collation | Nullable | Default
+        -----------------+-------------------+-----------+----------+---------
+        username        | character varying |           |          |
+        identitykeypair | character varying |           |          |
+        registrationid  | character varying |           | not null |
+        prekeys         | integer[]         |           |          |
+        signedprekey    | character varying |           |          |
+        Indexes:
+            "keys_pkey" PRIMARY KEY, btree (registrationid)
+        Foreign-key constraints:
+            "keys_username_fkey" FOREIGN KEY (username) REFERENCES userinfo(username)

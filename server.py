@@ -2,7 +2,7 @@ from operator import and_
 import requests
 import json
 from flask import Flask, request, jsonify
-from db import userinfo, servers, tokens, pending_friend_requests, pending_messages, connection
+from db import userinfo, servers, tokens, pending_friend_requests, pending_messages, connection, Keys
 import sqlalchemy as db
 from flask_bcrypt import Bcrypt
 import firebase_admin
@@ -467,6 +467,35 @@ def get_pending_messages():
     query = db.delete(pending_messages).where(
         pending_messages.columns.to_username == to_username)
     result = connection.execute(query)
+    return response
+
+@app.route('/keys', methods = ['POST'])
+def keys():
+    username = request.json['username']
+    identitykeypair = request.json['identitykeypair']
+    registrationid = request.json['registrationid']
+    signedprekey = request.json['signedprekey']
+    prekeys = request.json['prekeys']
+    
+    try:
+        query = db.insert(Keys).values(
+            username = username,
+            identitykeypair = identitykeypair,
+            registrationid = registrationid,
+            signedprekey = signedprekey,
+            prekeys = prekeys
+        )
+        connection.execute(query)
+    
+        response =  jsonify({
+                'status': 200,
+                'message': 'Success'
+            })
+    except:
+        response =  jsonify({
+                'status': 400,
+                'message': 'Error'
+            })
     return response
 
 @app.route('/webhook', methods = ['POST'])

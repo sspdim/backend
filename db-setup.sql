@@ -9,5 +9,6 @@ create table servers(ip_address varchar primary key, domain_name varchar, status
 create table tokens(token varchar primary key, username varchar);
 create table pending_friend_requests(from_username varchar, to_username varchar, request_status int, primary key (from_username, to_username));
 create table pending_messages(from_username varchar, to_username varchar, message_content varchar, message_id varchar, primary key (from_username, to_username, message_id));
+create table keys(username varchar, identitykeypair varchar, registrationid varchar primary key, prekeys integer[][], signedprekey varchar, foreign key (username) references userinfo(username));
 
 insert into servers values('35.209.49.77', 'none', 'active');

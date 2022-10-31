@@ -17,7 +17,7 @@ DOMAIN_NAME = 'capstoneX.devmashru.tech'
 FRIEND_REQUEST_PENDING = 3
 FRIEND_REQUEST_ACCEPTED = 2
 
-cred_obj = firebase_admin.credentials.Certificate('sspdim-firebase-adminsdk-5jn4m-fb95747ef9.json')
+cred_obj = firebase_admin.credentials.Certificate('sspdim-firebase-adminsdk-c7xkk-638be36ee8.json')
 default_app = firebase_admin.initialize_app(cred_obj)
 
 @app.route('/login', methods=['POST'])

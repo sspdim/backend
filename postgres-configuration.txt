@@ -41,18 +41,18 @@ Database 'sspdim':
         -----------------+-------------------+-----------+----------+---------
          from_username   | character varying |           | not null |
          to_username     | character varying |           | not null |
-         message_content | character varying |           |          |
+         message_content | integer[]         |           |          |
          message_id      | character varying |           | not null |
         Indexes:
             "pending_messages_pkey" PRIMARY KEY, btree (from_username, to_username, message_id)
     Table 'keys':
-            Column      |       Type        | Collation | Nullable | Default
+             Column      |       Type        | Collation | Nullable | Default
         -----------------+-------------------+-----------+----------+---------
-        username        | character varying |           |          |
-        identitykeypair | character varying |           |          |
-        registrationid  | character varying |           | not null |
-        prekeys         | integer[]         |           |          |
-        signedprekey    | character varying |           |          |
+         username        | character varying |           |          |
+         identitykeypair | integer[]         |           |          |
+         registrationid  | character varying |           | not null |
+         prekeys         | integer[]         |           |          |
+         signedprekey    | integer[]         |           |          |
         Indexes:
             "keys_pkey" PRIMARY KEY, btree (registrationid)
         Foreign-key constraints:

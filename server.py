@@ -501,27 +501,45 @@ def keys():
 
 @app.route('/getkeys', methods = ['POST'])
 def getkeys():
-    username = request.json['username']
-    ran = random.randint(1, 100)
+    username, domain_name = request.json['username'].split("@")
+    
+    if domain_name == DOMAIN_NAME:
+        ran = random.randint(1, 100)
 
-    try:
-        query = db.select([Keys]).where(
-            Keys.columns.username == username
-        )
-        result = connection.execute(query).fetchall()
-        response = jsonify({
-            'status': 200,
-            'registrationid': result[0][2],
-            'identitykeypair': result[0][1],
-            'signedprekey': result[0][4],
-            'prekey': result[0][3][ran],
-            'prekeys': result[0][3]
-        })
-    except Exception as e:
-        response = jsonify({
-            'status': 400,
-        })
-        print(e)
+        try:
+            query = db.select([Keys]).where(
+                Keys.columns.username == username
+            )
+            result = connection.execute(query).fetchall()
+            response = jsonify({
+                'status': 200,
+                'registrationid': result[0][2],
+                'identitykeypair': result[0][1],
+                'signedprekey': result[0][4],
+                'prekey': result[0][3][ran],
+                'prekeys': result[0][3]
+            })
+        except Exception as e:
+            response = jsonify({
+                'status': 400,
+            })
+            print(e)
+
+    else:
+        body = {
+            'username': request.json['username']
+        }
+        try:
+            r = requests.post('http://' + domain_name + '/getkeys', json = body, headers = {'Content-type': 'application/json'})
+            res = json.loads(r.text)
+            if res['status'] == 200:
+                response = res
+            else:
+                response = jsonify(res)
+        except:
+            response = jsonify({
+                'status': 500
+            })
     return response
 
 @app.route('/webhook', methods = ['POST'])

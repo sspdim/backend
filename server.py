@@ -514,7 +514,8 @@ def getkeys():
             'registrationid': result[0][2],
             'identitykeypair': result[0][1],
             'signedprekey': result[0][4],
-            'prekey': result[0][3][ran]
+            'prekey': result[0][3][ran],
+            'prekeys': result[0][3]
         })
     except Exception as e:
         response = jsonify({

@@ -7,6 +7,7 @@ import sqlalchemy as db
 from flask_bcrypt import Bcrypt
 import firebase_admin
 from firebase_admin import messaging
+import random
 
 import subprocess, os
 
@@ -496,6 +497,30 @@ def keys():
                 'status': 400,
                 'message': 'Error'
             })
+    return response
+
+@app.route('/getkeys', methods = ['POST'])
+def getkeys():
+    username = request.json['username']
+    ran = random.randint(1, 100)
+
+    try:
+        query = db.select([Keys]).where(
+            Keys.columns.username == username
+        )
+        result = connection.execute(query).fetchall()
+        response = jsonify({
+            'status': 200,
+            'registrationid': result[0][2],
+            'identitykeypair': result[0][1],
+            'signedprekey': result[0][4],
+            'prekey': result[0][3][ran]
+        })
+    except Exception as e:
+        response = jsonify({
+            'status': 400,
+        })
+        print(e)
     return response
 
 @app.route('/webhook', methods = ['POST'])

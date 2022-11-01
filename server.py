@@ -14,11 +14,11 @@ import subprocess, os
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
 
-DOMAIN_NAME = 'capstoneX.devmashru.tech'
+DOMAIN_NAME = os.environ['DOMAIN_NAME']
 FRIEND_REQUEST_PENDING = 3
 FRIEND_REQUEST_ACCEPTED = 2
 
-cred_obj = firebase_admin.credentials.Certificate('sspdim-firebase-adminsdk-c7xkk-638be36ee8.json')
+cred_obj = firebase_admin.credentials.Certificate(os.environ['FB_CREDENTIALS'])
 default_app = firebase_admin.initialize_app(cred_obj)
 
 @app.route('/login', methods=['POST'])

@@ -41,7 +41,7 @@ Database 'sspdim':
         -----------------+-------------------+-----------+----------+---------
          from_username   | character varying |           | not null |
          to_username     | character varying |           | not null |
-         message_content | integer[]         |           |          |
+         message_content | character varying |           |          |
          message_id      | character varying |           | not null |
         Indexes:
             "pending_messages_pkey" PRIMARY KEY, btree (from_username, to_username, message_id)

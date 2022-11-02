@@ -470,8 +470,8 @@ def get_pending_messages():
     result = connection.execute(query)
     return response
 
-@app.route('/keys', methods = ['POST'])
-def keys():
+@app.route('/insertkeys', methods = ['POST'])
+def insertkeys():
     username = request.json['username']
     identitykeypair = request.json['identitykeypair']
     registrationid = request.json['registrationid']

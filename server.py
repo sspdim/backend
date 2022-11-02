@@ -479,6 +479,14 @@ def keys():
     prekeys = request.json['prekeys']
     
     try:
+        query = db.select([Keys.columns.username])
+        result = connection.execute(query).fetchall()
+        if username in [r[0] for r in result]:
+            query = db.delete(Keys).where(
+                Keys.columns.username == username
+            )
+            connection.execute(query)
+
         query = db.insert(Keys).values(
             username = username,
             identitykeypair = identitykeypair,

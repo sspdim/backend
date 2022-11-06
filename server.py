@@ -560,6 +560,40 @@ def getkeys():
             })
     return response
 
+@app.route('/insertprekeys', methods = ['POST'])
+def insertprekeys():
+    username = request.json['username'].split('@')[0]
+    prekeys = request.json['prekeys']
+
+    try:
+        query = db.select([Keys]).where(
+            Keys.columns.username == username
+        )
+        result = connection.execute(query).fetchall()
+        try:
+            pre_keys = result[0][3]
+            for key in pre_keys:
+                prekeys.append(key)
+        except Exception as e:
+            print(e)
+        query = db.update(Keys).where(
+            Keys.columns.username == username
+        ).values(
+            prekeys = prekeys
+        )
+        connection.execute(query)
+
+        response =  jsonify({
+                'status': 200,
+                'message': 'Success'
+            })
+    except:
+        response =  jsonify({
+                'status': 400,
+                'message': 'Error'
+            })
+    return response
+
 @app.route('/webhook', methods = ['POST'])
 def webhook():
     home = os.environ["HOME"]

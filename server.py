@@ -512,20 +512,30 @@ def getkeys():
     username, domain_name = request.json['username'].split("@")
     
     if domain_name == DOMAIN_NAME:
-        ran = random.randint(1, 100)
 
         try:
             query = db.select([Keys]).where(
                 Keys.columns.username == username
             )
             result = connection.execute(query).fetchall()
+            number_of_prekeys = len(result[0][3])
+            ran = random.randint(0, number_of_prekeys - 1)
+            prekey = result[0][3].pop(ran)
+            prekeys = result[0][3]
+            query = db.update(Keys).where(
+                Keys.columns.username == username
+            ).values(
+                prekeys = prekeys
+            )
+            connection.execute(query)
             response = jsonify({
                 'status': 200,
                 'registrationid': result[0][2],
                 'identitykeypair': result[0][1],
                 'signedprekey': result[0][4],
-                'prekey': result[0][3][ran],
-                'prekeys': result[0][3]
+                'prekey': prekey,
+                'prekeys': result[0][3],
+                'number_of_prekeys': number_of_prekeys
             })
         except Exception as e:
             response = jsonify({

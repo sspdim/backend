@@ -534,7 +534,6 @@ def getkeys():
                 'identitykeypair': result[0][1],
                 'signedprekey': result[0][4],
                 'prekey': prekey,
-                'prekeys': result[0][3],
                 'number_of_prekeys': number_of_prekeys
             })
         except Exception as e:

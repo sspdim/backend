@@ -1,4 +1,4 @@
-alter user postgres passsword 'postgres';
+alter user postgres password 'postgres';
 create database sspdim;
 \c sspdim;
 drop table userinfo;

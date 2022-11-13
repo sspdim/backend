@@ -5,6 +5,9 @@ sudo apt install tmux python3-venv postgresql -y
 domain=$1
 port=$2
 
+sudo chmod 777 ~/backend/db-setup.sql;
+mv ~/backend/db-setup.sql /tmp/;
+
 # Install caddy
 tmux new -ds caddy "
 cd ~/;
@@ -30,7 +33,7 @@ exec $SHELL"
 # Start flask server
 tmux new -ds backend "
 export DOMAIN_NAME=$domain;
-export FB_CREDENTIALS=$4;
+export FB_CREDENTIALS=$3;
 cd ~/backend;
 python3 -m venv venv;
 source venv/bin/activate;
@@ -40,7 +43,5 @@ exec $SHELL"
 
 # Setup database
 tmux new -ds database "
-sudo chmod 777 /home/$3/backend/db-setup.sql;
-sudo -i -u postgres;
-psql -f /home/$3/backend/db-setup.sql;
+sudo -u postgres psql -f /tmp/db-setup.sql;
 exec $SHELL"

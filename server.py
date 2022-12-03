@@ -222,7 +222,8 @@ def send_message():
                         'action': 'message',
                         'data': request.json['from'],
                         'message': request.json['message'],
-                        'message_id': request.json['message_id']
+                        'message_id': request.json['message_id'],
+                        'timestamp': request.json['timestamp']
                     },
                     token = to_token[0][0]
                 )
@@ -242,7 +243,8 @@ def send_message():
                     from_username = request.json['from'],
                     to_username = request.json['to'],
                     message_content = request.json['message'],
-                    message_id = request.json['message_id'])
+                    message_id = request.json['message_id'],
+                    time_stamp = request.json['timestamp'])
                 connection.execute(query)
             except:
                 pass
@@ -290,7 +292,8 @@ def receive_message():
                     'action': 'message',
                     'data': request.json['from'],
                     'message': request.json['message'],
-                    'message_id': request.json['message_id']
+                    'message_id': request.json['message_id'],
+                    'timestamp': request.json['timestamp']
                 },
                 token = to_token[0][0]
             )
@@ -310,7 +313,8 @@ def receive_message():
                 from_username = request.json['from'],
                 to_username = request.json['to'],
                 message_content = request.json['message'],
-                message_id = request.json['message_id'])
+                message_id = request.json['message_id'],
+                time_stamp = request.json['timestamp'])
             connection.execute(query)
         except:
             pass
@@ -456,7 +460,7 @@ def get_pending_messages():
     query = db.select([pending_messages]).where(
         pending_messages.columns.to_username == to_username)
     result = connection.execute(query).fetchall()
-    response = [{'from_username': row[0], 'message_content': row[2], 'message_id': row[3]} for row in result]
+    response = [{'from_username': row[0], 'message_content': row[2], 'message_id': row[3], 'timestamp': row[4]} for row in result]
     query = db.delete(pending_messages).where(
         pending_messages.columns.to_username == to_username)
     result = connection.execute(query)

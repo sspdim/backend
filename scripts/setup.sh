@@ -5,8 +5,8 @@ sudo apt install tmux python3-venv postgresql -y
 domain=$1
 port=$2
 
-sudo chmod 777 ~/backend/db-setup.sql;
-mv ~/backend/db-setup.sql /tmp/;
+sudo chmod 777 /home/$4/backend/db-setup.sql
+mv /home/$4/backend/db-setup.sql /tmp/
 
 # Install caddy
 tmux new -ds caddy "

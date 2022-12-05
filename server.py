@@ -9,8 +9,6 @@ import firebase_admin
 from firebase_admin import messaging
 import random
 
-import subprocess, os
-
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
 
@@ -589,12 +587,6 @@ def insertprekeys():
                 'message': 'Error'
             })
     return response
-
-@app.route('/webhook', methods = ['POST'])
-def webhook():
-    home = os.environ["HOME"]
-    subprocess.call(['bash', home + '/backend/scripts/pull.sh'])
-    return jsonify({ 'status': 200 })
 
 @app.route('/', methods=['GET'])
 def home():
